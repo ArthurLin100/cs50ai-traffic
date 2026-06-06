@@ -5,12 +5,13 @@ import sys
 import tensorflow as tf
 
 from sklearn.model_selection import train_test_split
+from collections import Counter
 
 EPOCHS = 10
 IMG_WIDTH = 30
 IMG_HEIGHT = 30
-#NUM_CATEGORIES = 43
-NUM_CATEGORIES = 3
+NUM_CATEGORIES = 43
+# NUM_CATEGORIES = 3
 TEST_SIZE = 0.4
 
 
@@ -22,7 +23,7 @@ def main():
 
     # Get image arrays and labels for all image files
     images, labels = load_data(sys.argv[1])
-
+    print(f"Loaded {len(images)} images.")
     # Split data into training and testing sets
     labels = tf.keras.utils.to_categorical(labels)
     x_train, x_test, y_train, y_test = train_test_split(
@@ -31,10 +32,8 @@ def main():
 
     # Get a compiled neural network
     model = get_model()
+    model.summary()  # Print a summary of the model architecture
 
-    # print(y_train.shape)
-    # print(y_train[:5])
-    
     # Fit model on training data
     model.fit(x_train, y_train, epochs=EPOCHS)
 
@@ -71,10 +70,15 @@ def load_data(data_dir):
             path_to_file = os.path.join(path_to_category, file)
             img = cv2.imread(path_to_file)
             if img is not None:
-                img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))
+                img = cv2.resize(img, (IMG_WIDTH, IMG_HEIGHT))                
                 images.append(img)
                 labels.append(category)
-        
+
+    images = np.array(images, dtype="float32") / 255.0        
+    print(f"image shape is {images[0].shape}")
+    print(f"number of images: {len(images)}")
+    print(f"number of labels: {len(labels)}")    
+    print(f"counter of labels: {Counter(labels)}")
     return (images, labels)
 
 
